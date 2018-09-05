@@ -1,0 +1,522 @@
+RDA BSP CBA Software Package Creation
+HELPFUL?
+Rate as helpful	Rate as not helpful
+
++0
+	
+
+-0
+
+Contents
+1	Introduction
+1.1	Scope
+1.2	Target Groups
+1.3	Typographic Conventions
+
+2	
+Prerequisites
+2.1	Software Required
+2.2	Documentation
+2.3	Tools
+
+3	
+Create CBA Software Package (CSP)
+3.1	Setup the develop environment
+3.2	Create a CBA Software Package (CSP) for tenant 1
+3.3	Create a CBA Software Package (CSP) for tenant 2
+
+Glossary
+
+Reference List
+
+1   Introduction
+
+This document provides the instructions for creating a CBA Software Package (CSP) per tenant to install RDA BSP multi application system. For a complete description of the BSP system see Reference [1].
+
+In this document the term Tenant1 is used in the text to refer to the single application tenant or the first of the two tenants running in a multi application environment.
+
+The term Tenant2 is used for the second tenant running in a multi application environment.
+
+The text in this document will focus on the multi applications tenants, however the installation procedure for single application Tenant1 is similar to the same tenant used in multi application environment. The difference being that Tenant1 in single application environment uses only one sub-rack and another set of template files found in path singletenant-configuration of installation container, Reference [2].
+1.1   Scope
+
+The scope of this document is to create CBA Software Packages (CSP) that is later used for installing an RDA BSP multi application system.
+1.2   Target Groups
+
+The intended users of this document are application developers and testers that want to use the RDA BSP multi application system or similar systems.
+
+Users must have relevant training, knowledge and experience.
+
+    CBA training
+    Component Based Architecture (CBA) knowledge
+    Unix environments
+
+1.3   Typographic Conventions
+Table 1    Typographic Conventions
+
+Type
+	
+
+Description
+	
+
+Convention
+
+User Input
+	
+
+A command that you must enter in a Command Line Interface (CLI) exactly as written.
+	
+
+cd $HOME
+
+Command Variables
+	
+
+Command variables, the values of which you must supply.
+	
+
+<home_directory>
+
+System Elements
+	
+
+Command, parameter, program, path, and directory names
+	
+
+The files are located in E:\Test.
+
+The files are located in etc/opt/ericsson/bin. (1)
+
+Output Information
+	
+
+Text displayed by the system uses a special font.
+	
+
+System awaiting input
+
+Code Examples
+	
+
+Code examples
+	
+
+stat char* months[]=\
+
+{”Jan”,”Feb”}(2)
+
+(1)  The use of the forward slash (/) is for Unix systems, PC systems use the backslash (\).
+
+(2)  The back slash (\) is used to show where long lines are split.
+
+2   Prerequisites
+2.1   Software Required
+
+The software used when creating this RDA is listed in Table 2 along with the revision state of those components. This baseline of components also match the configuration files provided in the installation container Reference [2].
+
+If the baseline should be changed it's important to review PRI documents, installation and configuration documents for related CBA components.
+
+All CBA components in below list are downloaded from X-CI repository by using DX Toolbox Artifactory Manager.
+
+The same baseline is applicable for both single and multi application tenants except for the vDicos component that is only used for Tenant1. For the Tenant2 the DBS component is used without vDicos to achieve possibility to use Database Service runtime applications only.
+Table 2    Product Overview
+
+Product
+	
+
+Product Number
+	
+
+R-state
+
+LDEwS 4.2.0-86
+	
+
+ANA 901 39/4
+	
+
+R4A
+
+Core MW 4.2.0-716
+	
+
+APR 901 0444/4
+	
+
+R3A
+
+Trace EA 3.2.0-19
+	
+
+APR 901 0524/3
+	
+
+R3A
+
+Trace 3.2.0-41
+	
+
+APR 901 0500/3
+	
+
+R3A
+
+COM 7.1.0-35
+	
+
+APR 901 0443/7
+	
+
+R2A
+
+eVIP3.2-0-202
+	
+
+APR 901 0467/3
+	
+
+R3A
+
+vDicos EE 4.2.0-165
+	
+
+APR 901 0464
+	
+
+R11A
+
+CDF 3.2.0-189
+	
+
+APR 901 0564/3
+	
+
+R3A
+
+DBS 5.3.0-321
+	
+
+APR 901 0533
+	
+
+R4A
+
+LEM 4.2.0-180
+	
+
+APR 901 0534
+	
+
+R3A
+
+LM 6.0.0-23
+	
+
+APR 901 0503/5
+	
+
+R3A
+
+LM SA 2.2.0-8
+	
+
+APR 901 0528/2
+	
+
+R3A
+
+Java OAM 2.2.0-135
+	
+
+APR 901 0487/2
+	
+
+R3A
+
+MMAS 5.2.0-250
+	
+
+ANA 901 40/5
+	
+
+R3A
+
+MMAS-jdk 5.2.0-19
+	
+
+CXP 904 0510
+	
+
+R3A
+
+MMAS-eap 5.2.0-34
+	
+
+CXP 904 0551
+	
+
+R3A
+
+MMAS-infinispan 5.2.0-18
+	
+
+CXP 904 2023/5
+	
+
+R3A
+
+MMAS-sds 5.2.0-76
+	
+
+CXP 904 2021/5
+	
+
+R3A
+
+Java SIP 2.2.0-442
+	
+
+APR 901 0526/2
+	
+
+R3A
+
+SS7 CAF 5.1.0-232
+	
+
+ANA 901 37
+	
+
+R2A
+
+SEC 2.2.0-109 (1)
+	
+
+APR 901 0539/2
+	
+
+R3A
+
+(1)   Be aware that SEC component consists of six runtime packages, SEC_acs, SEC_crypto, SEC_secm, SEC_cert, SEC_ldap and SEC_la.
+
+2.2   Documentation
+
+The documentation for included CBA components can be found in CAL Store: http://calstore.internal.ericsson.com.
+
+Navigate to folder CBA Common Components and RDA. This main folder is structured in a way that each component provides its own set of stand-alone libraries.
+
+DX Toolbox documentation is also found in the same folder.
+2.3   Tools
+
+The following tools from the DX Toolbox are used to create a CBA Software Package (CSP).
+
+    DX Toolbox Artifactory Manager
+
+    This tool is used to download all CBA software components (both runtime and deployment packages) from a repository. The default repository is X-CI.
+    DX Toolbox CSM Tool
+
+    The CSM tool provides a set of tools that helps the users in CSM based Components or Application development and deployment. The tools helps the users in modeling, validation and transformation phases when preparing a CBA Software Package (CSP).
+    DX Toolbox CSP Tool
+
+    DX Toolbox provides CBA Software Package tool, a software utility that helps in creating the Upgrade Package for Component Based Architecture (CBA) components. The tool creates the CBA Software Package (CSP).
+    DX Toolbox AMF Configuration Generation Support
+
+    The DX Toolbox AMF CGS tool is used to generate AMF configurations. The tool is used by the CSP tool.
+    DX Toolbox SDP Tool
+
+    Software Delivery Package (SDP) packaging tool. The tool is used by the CSP tool.
+
+Released versions of the DX Toolbox tools are available in the Unix HUB for all users. This guide will use these tools. A pre requisite are Python and Curl with a minimum version 2.7 and 7.27 respectively. Java Development Kit (JDK) is required by the SDP and AMF tool.
+
+Tools can also be downloaded from X-CI repository and in that case tools need to be installed. For more details on tools and installation, refer to DX Toolbox in CAL Store and installation instructions for each tool.
+
+Access to Ericsson Corporate develop environment Unix HUB is a requirement. Each developer should use their own Unix account in the Unix HUB when working with the DX Toolbox.
+3   Create CBA Software Package (CSP)
+
+This chapter describes how to create CBA Software Package (CSP) with tools from DX Toolbox.
+3.1   Setup the develop environment
+
+Login to the Unix HUB and source definitions for Python, Curl and DX Toolbox.
+
+    Login to the HUB.
+    Add python and curl to your environment.
+
+    % module add python/2.7.6
+    % module add curl/7.27.0
+    % module load jdk/1.8.0_92
+    Add DX Toolbox to your environment. These commands would source all required tools in DX Toolbox.
+
+    % module use /app/dxtoolbox/modules
+
+    % module add dxtoolbox/1.0
+    Configure Artifactory Manager tool.
+
+    Create the ~/.am_ws/ArtifactManager.cfg file and populate it with configuration as below. For more information how to configure Artifactory Manager see Reference [3].
+
+    % more .am_ws/ArtifactManager.cfg
+    cacheLocation = /home/<userid>/.am_cache
+    cacheFileCount = 4
+    Username = <username>
+    Password = <password>
+    Set environment variable to the location where you have your Artifactory Manager workspace.
+
+    % setenv AM_WORKSPACE ~/.am_ws
+    Set environment variable to the location where you have your CSM workspace.
+
+    % setenv CSM_WORKSPACE /tmp/CSM-$USER
+
+3.2   Create a CBA Software Package (CSP) for tenant 1
+
+In this step DX Tools are used to download software, configure and finally creating a CBA Software Package (CSP). The installation container in Reference [2] is used to configure all components of the system. Configuration files for Tenant1 are located in path multitenant_configuration/bsp_tenant_1/ in the installation container.
+
+    Create the work directories for Tenant1.
+
+    % mkdir -p ~/bsp_tenant1/repo/{DP/,RT/}
+    % mkdir -p ~/bsp_tenant1/input/
+    % mkdir -p ~/bsp_tenant1/output/
+    Copy the software version file version.xml and the two CSM models system.yml and JavaSimpleApp.yml from the installation container to the directory ~/bsp_tenant1/input/.
+
+    % cp versions.xml ~/bsp_tenant1/input/
+    % cp system.yml ~/bsp_tenant1/input/
+    % cp JavaSimpleApp.yml ~/bsp_tenant1/input/
+    Use the Artifactory Manager to download the deployment packages.
+
+    % artifact_manager -e -gp -i ~/bsp_tenant1/input/ \
+    versions.xml -o ~/bsp_tenant1/repo/DP/
+
+    For more information how to use this command see Reference [3].
+    Remove any old CSM model in the CSM_WORKSPACE.
+
+    % rm -rf $CSM_WORKSPACE
+    Import the two CSM models to the CSM workspace CSM_WORKSPACE model and rebase the CSM entities present in workspace model.
+
+    % csmcli import ~/bsp_tenant1/input/system.yml
+    % csmcli import ~/bsp_tenant1/input/JavaSimpleApp.yml
+    % csmcli import ~/bsp_tenant1/repo/DP/ --rebase
+
+    For more information how to use this command see Reference [4].
+    Validate the CSM model.
+
+    % csmlint -i $CSM_WORKSPACE/csm.yml
+
+    For more information how to use this command see Reference [5].
+    Create CSM directory layout in $CSM_WORKSPACE taking CBA system model $CSM_WORKSPACE/csm.yml and directory of extracted deployment packages ~/bsp_tenant1/repo/DP/ as input.
+
+    % csmconfig init -d ~/bsp_tenant1/repo/DP/
+
+    For more information how to use this command see Reference [6].
+    Update configuration files for the system.
+
+    In this step default templates in the $CSM_WORKSPACE/config/initial directory structure are replaced with preset configuration from the installation container.
+
+    Some configuration parameters are modified by editing the configuration files.
+        Update LDE configuration.
+
+        % cp cluster.conf $CSM_WORKSPACE/config/ \
+        initial/ldews.os/.
+        Open $CSM_WORKSPACE/config/initial/ldews.os/installation.conf in a text editor and change disk_device_path as below.
+
+        disk_device_path=/dev/disk/by-path/pci- \
+        0000:03:00.0-sas-phy0-0x4433221100000000-lun-0
+        Set SC absence in $CSM_WORKSPACE/config/initial/coremw.core/preinstall.conf as below.
+
+        scAbsenceAllowed="900"
+        Enable scaling and set scale out time in $CSM_WORKSPACE/config/initial/coremw.core/postinstall.conf as below.
+
+        enableElasticEngine="1"
+        batchScaleOutTime="140"
+        Enable TIPC Multicast in CoreMW.
+
+        Open $CSM_WORKSPACE/config/initial/coremw.core/preinstall.conf in a text editor and change the configuration as below.
+
+        tipcMulticast="1"
+        Update EVIP configuration.
+
+        % cp evip.xml $CSM_WORKSPACE/config/initial/ \
+        evip.config.mgr/.
+        Update JavaSIP configuration.
+
+        % cp traffic-config.xml $CSM_WORKSPACE/config/ \
+        initial/javasip.runtime/.
+        Update SS7Caf configuration.
+
+        % cp active.om.cim.conf $CSM_WORKSPACE/config/ \
+        initial/ss7caf.main/.
+        Update vDicosEE configuration.
+
+        % cp vdicosConfig_cdfmodel.xml $CSM_WORKSPACE/ \
+        config/initial/vdicosee-LpmsvAgent-CXC1731620/.
+    Update CSM directory $CSM_WORKSPACE/config/ layout with configuration changes made in previous step.
+
+    % csmconfig update -d ~/bsp_tenant1/repo/DP/
+
+    This will update the ovf-evn.xml system environment file with all the mark-up tags.
+    Create the runtime version file ~/bsp_tenant1/output/RT-version/version.xml required by Artifactory Manager to download runtime packages.
+
+    % mkdir ~/bsp_tenant1/output/RT-version
+    % csm2am init -c $CSM_WORKSPACE ~/bsp_tenant1/ \
+    output/RT-version
+
+    For more information how to use this command see Reference [7].
+    Use the newly generated version.xml to create the runtime repository.
+
+    % artifact_manager -f -gp -i ~/bsp_tenant1/output/ \
+    RT-version/version.xml -o ~/bsp_tenant1/repo/RT/
+    Create the Software Domain Profile also referred to as SWDP file using system model in $CSM_WORKSPACE.
+
+    % csm2csp create-swdp ~/bsp_tenant1/output/ \
+    -r ~/bsp_tenant1/repo/RT/ -d ~/bsp_tenant1/repo/DP/
+
+    For more information how to use this command see Reference [8].
+    Create a CBA Software Package (CSP) that will contain the repository and a merged campaign.
+
+    % mkdir ~/bsp_tenant1/output/csp-package
+    % csp-upgrade-package-create \
+    -s ~/bsp_tenant1/output/swdp \
+    -p bsp_tenant1_csp.tar.gz -f CSP2.0 \
+    ~/bsp_tenant1/output/csp-package
+
+    For more information how to use this command see Reference [9].
+    Verify that the CSP is successfully created.
+
+    % ls ~/bsp_tenant1/output/csp-package/
+
+    DEPLOYMENT.template SWDP UPRepo bsp_tenant1_csp.tar.gz
+
+3.3   Create a CBA Software Package (CSP) for tenant 2
+
+The procedure is basically the same as for Tenant1 in previous chapter. Configuration files for Tenant2 are located in path multitenant_configuration/bsp_tenant_2/ in the installation container.
+
+    Create the work directories for Tenant2.
+
+    % mkdir -p ~/bsp_tenant2/repo/{DP/,RT/}
+    % mkdir -p ~/bsp_tenant2/input/
+    % mkdir -p ~/bsp_tenant2/output/
+    Repeat all steps from step 2 until step 12 in previous chapter making sure that configuration files for Tenant2 is used and that all data for Tenant2 is kept separately in ~/bsp_tenant2 directory.
+
+    Skip the step where vDicosEE is updated since Tenant2 don't have any vDicosEE component.
+
+    Use a unique name for Tenant2 CSP package.
+    Verify that the CSP is successfully created.
+
+    % ls ~/bsp_tenant2/output/csp-package/
+
+    DEPLOYMENT.template SWDP UPRepo bsp_tenant2_csp.tar.gz
+
+
+Glossary
+
+See Glossary of Terms and Acronyms, Reference [10].
+
+Reference List
+[1] RDA BSP System Description, 30/1551-APR 901 0329/3 Uen
+[2] RDA BSP Installation Container, 29/1551-APR 901 0329/3
+[3] DX Toolbox Artifactory Manager User Guide, 1/1553-CXP 902 6463/1
+[4] DX Toolbox CSMT CSMCLI User Guide, 1/1553-CXP 902 9274/1
+[5] DX Toolbox CSMT CSMLINT User Guide, 2/1553-CXP 902 9274/1
+[6] DX Toolbox CSMT CSMCONFIG User Guide, 3/1553-CXP 902 9274/1
+[7] DX Toolbox CSMT CSM2AM User Guide, 6/1553-CXP 902 9274/1
+[8] DX Toolbox CSMT CSM2CSP User Guide, 4/1553-CXP 902 9274/1
+[9] DX Toolbox CSP Tool User Guide, 1/1553-CXP 902 3643/3
+[10] Glossary of Terms and Acronyms, Reference Deployment Architecture (RDA) 0033-APR 901 0329/3

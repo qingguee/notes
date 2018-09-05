@@ -1,0 +1,193 @@
+Quick Start for UPG CBA Uprgade Package Generation and Execution
+
+---------------------------------------
+History
+---------------------------------------
+2017.07.25  1st draft version
+
+---------------------------------------
+CPI Navigation
+---------------------------------------
+1. DX Toolbox 1.1 CPI Installation Instruction
+	* DX Toolbox SDP Tool Installation Instructions
+	* DX Toolbox AMF Configuration Generation Support
+	* CSP Tool Installation Instructions
+2. DX Toolbox 1.1 CPI "DX Toolbox CSP Tool User Guide" section "6 Creation of Upgrade Package (UP) or CBA Software Package (CSP) using single command"
+3. DX Toolbox 1.1 CPI "DX Toolbox CSP Tool Software Domain Profile Interface"
+4. Core MW x86_64 4.3 CPI "Core MW Management Guide" section "5.6 Use CLI for Upgrade Package/CSP"
+
+---------------------------------------
+Step 1: Setup env for UP generation
+---------------------------------------
+
+AIT server: 10.175.170.61 	root/root000
+
+1. Downloading Installation Packages
+
+	*DX Toolbox SDP Tool
+	https://arm.rnd.ki.sw.ericsson.se/artifactory/proj-cba-dev-local/com/ericsson/cba/dxtoolbox/dxtoolbox-sdpt/
+	*DX Toolbox AMF CGS
+	https://arm.rnd.ki.sw.ericsson.se/artifactory/proj-cba-dev-local/com/ericsson/cba/dxtoolbox/dxtoolbox-amfcgs/
+	*DX Toolbox CSP Tool
+	https://arm.rnd.ki.sw.ericsson.se/artifactory/proj-cba-all/com/ericsson/cba/dxtoolbox/dxtoolbox-cspt/
+	
+There packages have been downloaded and locate on 	\\vhub.sh.cn.ao.ericsson.se\proj\team\Baymax\UPG1.5 upgrade documents\upgrade\
+	* dxtoolbox-amfcgscli-1.2.0-37-runtime-linux-cxp9033540.tar.gz
+	* dxtoolbox-sdpt-2.0.0-99
+	* dxtoolbox-cspt-3.2.0-2-runtime-linux-cxp9023643.tar
+	* jre-8u131-linux-x64.rpm
+
+2. Unpacking DX Toolbox packages in Linux 
+
+	tar xvzf /home/upgrade/csptool/dxtoolbox-amfcgscli-1.2.0-37-runtime-linux-cxp9033540.tar.gz
+	tar xvzf /home/upgrade/csptool/dxtoolbox-sdpt-2.0.0-99
+	tar xvzf /home/upgrade/csptool/dxtoolbox-cspt-3.2.0-2-runtime-linux-cxp9023643.tar
+	
+3. Set environment variables using source.bash
+
+	source /home/upgrade/csptool/dxtoolbox-cspt-3.2.0-2/install/source.bash
+	source /home/upgrade/csptool/dxtoolbox-amfcgscli-1.2.0-37/install/source.bash
+	source /home/upgrade/csptool/dxtoolbox-sdpt-2.0.0-99/install/source.bash
+
+Note: The dxtoolbox tool need 1.8 jre, so check command "java -version" here.
+
+Aitserver:/home/upgrade/csptool # java -version
+java version "1.8.0_131"
+Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
+Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
+	
+---------------------------------------
+Step 2: Prepare Deployment Package
+---------------------------------------	
+1. Copy all CC packages to SWDP folder
+
+	For example:
+	/home/upgrade/cbacomp 	# on AIT server, the path is same as [PR] in swdp file
+
+2. Create a Software Domain Profile refer to swdp template
+
+	For example:
+   /home/upgrade/swdp/swdp_template_for_UPG_1.5
+
+Note: 
+
+	* Refer to CPI "DX Toolbox CSP Tool Software Domain Profile Interface" get more information about SWDP.
+	* ProductName in PKGINFO must has a prefix as 'ERIC-'. The name will be used in next step when generate Upgrade Packge.
+	* ProductNumber/ProductRevision/ProductDate should be specified according to product version management.
+   
+---------------------------------------
+Step 3: Generate Upgrade Package
+---------------------------------------	
+1. Create SWDP file according to upgrade packages list
+
+	For example:
+	/home/upgrade/swdp/swdp_1.5
+	
+2. Create two output folders
+
+	$ mkdir -p UPRepo OUTPUT
+	
+3. Generate Upgrade Package with one command
+
+	$ csp-upgrade-package-create --swdp /home/upgrade/swdp/swdp_1.5 --package-name UPG_UP_PACKAGE-cba-1.5 --MESubtype ERIC-UPG:C+P:14400 --package-format UP --up-repo /home/upgrade/UPRepo /home/upgrade/OUTPUT
+	
+		* --package-name <NAME> :  Name of Upgrade Package.
+		* --MESubtype <Name:activationTimeout> 
+			<Name> is same as 'ProductName' in PKGINFO of swdp file. 
+			
+	The package file will output to /home/upgrade/OUTPUT/UPG_UP_PACKAGE-cba-1.5.tar.gz
+	
+---------------------------------------
+Step 4: Install Upgrade Package
+---------------------------------------
+
+1. Prepare UP in SC
+
+	# mkdir -p /storage/system/software/UP
+	# cmw-swm-config-set -l /storage/system/software/ -s ERIC-UPG -b 0 -r 0
+
+	-l, --localFileStorePath	
+	-s, --subType	subType is the name of the node type.
+	-b, --automaticBackup	Set automaticBackup to 1 (true) if ECIM SWM is to take an automatic backup at activation, otherwise use 0(false).
+	-r, --automaticRestore	automaticRestore is set to 1 (true) in order for ECIM SWM to perform automatic restore at failure.
+
+Note:
+	* subType is same as the parameter of --MESubtype in last step 'csp-upgrade-package-create'
+	* automaticBackup/automaticRestore are disabled in this case
+	* Refer to Core MW x86_64 4.3 CPI "Core MW Management Guide" section "5.5   Configure ECIM SWM" for more information
+	
+2. Upload UP to cluster	
+	
+	Copy Upgrade Package UPG_UP_PACKAGE-cba-1.5.tar.gz to folder /storage/system/software/UP. 
+	
+3. Use CLI for Upgrade Package/CSP
+
+	1) Create a UP from the file argument:
+		cmw-swm --up-create /storage/system/software/UP/UPG_UP_PACKAGE-cba-1.5.tar.gz
+		
+		SC-1:~ # cmw-swm --up-status
+		Action: CreateUpgradePackage - FINISHED
+		Result: SUCCESS
+
+	2) Verify that the UP was created and to get the <UP-ID> of the UP/CSP:
+	
+		cmw-swm --up-list
+		
+	3) View the UP status:
+	
+		cmw-swm --up-status <UP-ID>
+		
+	4) Prepare the ME for the activation of the UP with <UP-ID>:
+	
+		cmw-swm --up-prepare <UP-ID>
+		
+	5) Activate the UP/CSP step by step or all at once:
+	
+		cmw-swm --up-activate <UP-ID>
+		
+	* cluster reboot will occur
+		
+	6) Verify that the upgrade procedure is completed:
+	
+		cmw-swm --up-confirm <UP-ID>
+		
+	7) Delete the UP/CSP MO given as action parameter:
+	
+		cmw-swm --up-remove <UP-ID>
+	
+Note:
+	* Refer to Core MW x86_64 4.3 CPI "Core MW Management Guide" section "5.6   Use CLI for Upgrade Package/CSP" for more information
+
+------restore after CBA upgrade 
+
+Step1: backup "/storage/system/config/com-apr9010443/etc/model/model_file_list.cfg" before upgrade CBA
+Step2: do CBA upgrade using ESM method
+Step3: Restore cmw backup which done before upgrade
+ 
+Step4: copy model_file_list.cfg back before invoke cluster reboot command
+
+delete line ‘/opt/com/etc/model/ComFileTPM.xml’ in model_file_list.cfg, this is the only difference in two version.
+
+	
+---------------------------------------
+Trouble Shooting
+---------------------------------------
+
+
+---------------------------------------
+How to raise UP related jira case:
+---------------------------------------
+JIRA Case Link: https://cc-jira.rnd.ki.sw.ericsson.se/
+
+Collect info (if needed):
+
+	* cmw-immconfig-export cc-<CASE_NUMBER>.xml
+	* cmw-collect-info /cluster/cc-<id>.tar.gz -->if it is big, use ftp.
+
+		host: ftp://ftp.support.lab.ei.k2.ericsson.se/
+		user: ccftp
+		pass: ccftp1
+    Create a directory /pub/caseCC-$CASE_NUMBER and put the file(s) inside.
+	
+	
+	Maybe include this log collection automatically in the upgrade scripts
